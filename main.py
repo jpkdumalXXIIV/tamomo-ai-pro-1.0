@@ -13,7 +13,19 @@ from contextlib import asynccontextmanager
 # Assure-toi que le dossier "agents" et le fichier "models.py" sont bien au même endroit.
 from agents.coordinator import CoordinatorAgent
 from models import TaskRequest, TaskResponse, AgentResponse, HealthResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
+import os
 
+# Ajoute ça après la création de l'app FastAPI
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Ajoute cette route au début (avant les autres routes)
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    """Page d'accueil attractive"""
+    with open("static/index.html", "r", encoding="utf-8") as f:
+        return f.read()
 # ============================================
 # CONFIGURATION DE L'APPLICATION
 # ============================================
@@ -26,7 +38,19 @@ app = FastAPI(
     docs_url="/docs",  # La page de documentation automatique
     redoc_url="/redoc" # Une autre version de la documentation
 )
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
+import os
 
+# Ajoute ça après la création de l'app FastAPI
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Ajoute cette route au début (avant les autres routes)
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    """Page d'accueil attractive"""
+    with open("static/index.html", "r", encoding="utf-8") as f:
+        return f.read()
 # Configuration CORS (permet à d'autres sites d'accéder à ton API)
 app.add_middleware(
     CORSMiddleware,
