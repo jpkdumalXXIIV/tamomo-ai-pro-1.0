@@ -1,101 +1,635 @@
-# ============================================
-# TAMOMO AI PRO - Serveur principal
-# Version 2.0 avec upload de fichiers
-# ============================================
-
-from fastapi import FastAPI, UploadFile, File, Form
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
-from typing import Optional
-import os
-import pypdf
-import io
-
-# Création de l'application FastAPI
-app = FastAPI(title="TAMOMO AI PRO")
-
-# Configuration CORS (autorise toutes les connexions)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# ============================================
-# ROUTE 1 : Page d'accueil (affiche le site)
-# ============================================
-@app.get("/", response_class=HTMLResponse)
-def root():
-    """Affiche le fichier index.html"""
-    with open("index.html", "r", encoding="utf-8") as f:
-        return f.read()
-
-# ============================================
-# ROUTE 2 : Traitement de la demande IA
-# ============================================
-@app.post("/execute")
-async def execute_task(
-    task: str = Form(...),
-    agent_type: str = Form("coordinator"),
-    file: Optional[UploadFile] = File(None)
-):
-    """
-    Traite la demande de l'utilisateur avec ou sans fichier.
-    Reçoit : task (texte), agent_type (type d'agent), file (fichier optionnel)
-    """
-    
-    file_content = None
-    file_name = None
-    
-    # Si un fichier est uploadé, on l'analyse
-    if file:
-        file_name = file.filename
-        content = await file.read()
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAMOMO AI PRO - L'IA qui déchire 🔥</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap');
         
-        # Lecture du PDF
-        if file_name.endswith('.pdf'):
-            try:
-                pdf_reader = pypdf.PdfReader(io.BytesIO(content))
-                file_content = ""
-                for page in pdf_reader.pages:
-                    file_content += page.extract_text() + "\n"
-            except Exception as e:
-                file_content = f"Erreur lecture PDF: {str(e)}"
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
-        # Lecture du fichier texte
-        elif file_name.endswith('.txt'):
-            file_content = content.decode('utf-8')
-        
-        else:
-            file_content = "Format non supporté. Utilisez PDF ou TXT."
-    
-    # Construction de la réponse
-    result = f"📄 **Fichier analysé :** {file_name if file_name else 'Aucun'}\n\n"
-    result += f"📊 **Taille du contenu :** {len(file_content) if file_content else 0} caractères\n\n"
-    result += f"🤖 **Agent utilisé :** {agent_type}\n\n"
-    result += f"📝 **Ta demande :** {task}\n\n"
-    
-    if file_content:
-        # On affiche les 500 premiers caractères du document
-        preview = file_content[:500].replace('\n', ' ')
-        result += f"📋 **Aperçu du document :**\n{preview}...\n\n"
-        result += "✅ L'IA a analysé ton document avec succès !"
-    else:
-        result += "✅ Traitement effectué sans fichier joint."
-    
-    return {
-        "success": True,
-        "result": result,
-        "agent_used": agent_type,
-        "file_processed": file_name
-    }
+        body {
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            min-height: 100vh;
+        }
 
-# ============================================
-# ROUTE 3 : Vérification de santé (pour Railway)
-# ============================================
-@app.get("/health")
-def health_check():
-    """Railway utilise cette route pour vérifier que l'app fonctionne"""
-    return {"status": "healthy", "version": "2.0"}
+        /* CANVAS */
+        #starfield, #fireworks {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        #fireworks { z-index: 1; opacity: 0; transition: opacity 1s; }
+        #fireworks.active { opacity: 1; }
+
+        /* MASCOTTE */
+        .mascot-container { animation: float 3s ease-in-out infinite; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(-2deg); }
+            50% { transform: translateY(-30px) rotate(2deg); }
+        }
+        .mascot-glow {
+            filter: drop-shadow(0 0 40px rgba(255, 107, 53, 0.9));
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 40px rgba(255, 107, 53, 0.9)); }
+            50% { filter: drop-shadow(0 0 60px rgba(255, 165, 0, 1)); }
+        }
+
+        /* INTRO */
+        .intro-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: black;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            animation: fadeOutIntro 1s ease 8s forwards;
+        }
+        @keyframes fadeOutIntro { to { opacity: 0; visibility: hidden; } }
+        .intro-text {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: scaleIn 1s ease 0.5s both;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* CONTENU */
+        .main-content {
+            position: relative;
+            z-index: 10;
+            opacity: 0;
+            animation: fadeInContent 1s ease 9s forwards;
+        }
+        @keyframes fadeInContent { to { opacity: 1; } }
+
+        /* NAV */
+        nav {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(255, 107, 53, 0.3);
+        }
+        .nav-link { transition: all 0.3s; font-weight: 600; }
+        .nav-link:hover { color: #ff6b35; }
+
+        /* BOUTONS */
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            transition: all 0.3s;
+            font-weight: 700;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.5);
+        }
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+            transition: all 0.3s;
+        }
+        .btn-whatsapp:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.5);
+        }
+
+        /* CARTES */
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 107, 53, 0.2);
+            transition: all 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255, 107, 53, 0.6);
+            box-shadow: 0 20px 40px rgba(255, 107, 53, 0.3);
+        }
+
+        /* SCROLL */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s;
+        }
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* SPINNER */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #ff6b35;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* CORRECTIF COULEURS */
+        body { color: #ffffff !important; }
+        .text-gray-300 { color: #e5e7eb !important; }
+        .text-gray-400 { color: #d1d5db !important; }
+        select, textarea, input {
+            color: #ffffff !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+        }
+        select option {
+            background-color: #1a1a2e !important;
+            color: #ffffff !important;
+        }
+
+        /* UPLOAD ZONE */
+        .upload-zone {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .upload-zone:hover {
+            border-color: #ff6b35 !important;
+            background: rgba(255, 107, 53, 0.1) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- INTRO -->
+    <div class="intro-overlay" id="intro">
+        <div class="intro-text">TAMOMO AI PRO</div>
+        <p class="text-gray-400 mt-4 text-xl">L'IA qui déchire 🔥</p>
+    </div>
+
+    <!-- CANVAS -->
+    <canvas id="starfield"></canvas>
+    <canvas id="fireworks"></canvas>
+
+    <!-- CONTENU -->
+    <div class="main-content">
+        
+        <!-- NAV -->
+        <nav class="fixed top-0 w-full z-50">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-fire text-3xl text-orange-500"></i>
+                    <span class="text-2xl font-bold">TAMOMO <span class="text-orange-400">AI PRO</span></span>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#features" class="nav-link text-white">Fonctionnalités</a>
+                    <a href="#demo" class="nav-link text-white">Démo</a>
+                    <a href="#pricing" class="nav-link text-white">Tarifs</a>
+                    <a href="#contact" class="nav-link text-white">Contact</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- HERO -->
+        <section class="min-h-screen flex items-center justify-center px-4 pt-20">
+            <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+                <div class="text-center md:text-left">
+                    <div class="inline-block mb-6 px-4 py-2 bg-orange-500/20 rounded-full border border-orange-500/30">
+                        <span class="text-orange-400 font-bold">🔥 Nouveau</span>
+                        <span class="text-sm text-gray-300 ml-2">Multi-agents IA</span>
+                    </div>
+                    <h1 class="text-5xl md:text-6xl font-black mb-6 leading-tight">
+                        Ton équipe IA<br>
+                        <span class="bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
+                            qui déchire grave
+                        </span>
+                    </h1>
+                    <p class="text-xl text-gray-300 mb-8">
+                        Des agents spécialisés qui bossent ensemble pour toi. 
+                        Rapide, stylé et efficace.
+                    </p>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <a href="#demo" class="btn-primary px-8 py-4 rounded-full text-lg text-center">
+                            <i class="fas fa-rocket mr-2"></i> Tester Gratuitement
+                        </a>
+                        <a href="#features" class="bg-white/10 hover:bg-white/20 px-8 py-4 rounded-full text-lg font-semibold transition text-center">
+                            <i class="fas fa-info-circle mr-2"></i> En savoir plus
+                        </a>
+                    </div>
+                </div>
+                <div class="mascot-container flex justify-center">
+                    <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=500" 
+                         alt="Mascotte TAMOMO" 
+                         class="mascot-glow rounded-2xl shadow-2xl max-w-md">
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES -->
+        <section id="features" class="py-20 px-4">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-4xl md:text-5xl font-black text-center mb-4 scroll-reveal">
+                    Pourquoi <span class="text-orange-400">TAMOMO</span> ?
+                </h2>
+                <p class="text-center text-gray-400 mb-16 text-lg">La plateforme IA des jeunes</p>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
+                        <div class="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-brain text-3xl text-orange-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Multi-Agents</h3>
+                        <p class="text-gray-300">3 agents spécialisés qui collaborent automatiquement.</p>
+                    </div>
+                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
+                        <div class="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-bolt text-3xl text-yellow-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Ultra Rapide</h3>
+                        <p class="text-gray-300">Résultats en temps réel. Pas d'attente.</p>
+                    </div>
+                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
+                        <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-file-alt text-3xl text-red-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Upload de Fichiers</h3>
+                        <p class="text-gray-300">Importe tes PDF et documents pour analyse IA.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DEMO -->
+        <section id="demo" class="py-20 px-4 bg-black/30">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-4xl md:text-5xl font-black text-center mb-4 scroll-reveal">
+                    Teste <span class="text-orange-400">maintenant</span>
+                </h2>
+                <p class="text-center text-gray-400 mb-12">Gratuit, sans inscription</p>
+                
+                <div class="feature-card rounded-3xl p-8 scroll-reveal">
+                    
+                    <!-- Agent -->
+                    <div class="mb-6">
+                        <label class="block text-white font-semibold mb-3">
+                            <i class="fas fa-robot mr-2 text-orange-400"></i>Choisis ton agent
+                        </label>
+                        <select id="agentType" class="w-full px-4 py-3 bg-white/10 border border-orange-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <option value="coordinator" class="bg-gray-900">🤖 Coordinateur (Auto)</option>
+                            <option value="researcher" class="bg-gray-900"> Chercheur</option>
+                            <option value="writer" class="bg-gray-900">✍️ Rédacteur</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Demande -->
+                    <div class="mb-6">
+                        <label class="block text-white font-semibold mb-3">
+                            <i class="fas fa-comment mr-2 text-yellow-400"></i>Ta demande
+                        </label>
+                        <textarea id="taskInput" rows="4" class="w-full px-4 py-3 bg-white/10 border border-orange-500/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500" 
+                            placeholder="Ex: Résume ce document, ou pose une question..."></textarea>
+                    </div>
+                    
+                    <!-- UPLOAD FICHIER -->
+                    <div class="mb-6">
+                        <label class="block text-white font-semibold mb-3">
+                            <i class="fas fa-paperclip mr-2 text-blue-400"></i>Ajouter un fichier (optionnel)
+                        </label>
+                        <label class="upload-zone block bg-white/10 border-2 border-dashed border-orange-500/30 rounded-xl px-4 py-6 text-center">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-orange-400 mb-2"></i>
+                            <p class="text-gray-300 text-sm">Clique pour uploader un PDF ou TXT</p>
+                            <p id="fileName" class="text-orange-400 text-xs mt-2 font-semibold"></p>
+                            <input type="file" id="fileInput" accept=".pdf,.txt" class="hidden" onchange="showFileName()">
+                        </label>
+                    </div>
+                    
+                    <!-- Bouton -->
+                    <button onclick="lancerIA()" class="btn-primary w-full text-white font-bold py-4 rounded-xl text-lg">
+                        <i class="fas fa-magic mr-2"></i> Générer avec l'IA
+                    </button>
+                    
+                    <!-- Loading -->
+                    <div id="loading" class="hidden text-center py-8 mt-6">
+                        <div class="spinner mx-auto mb-4"></div>
+                        <p class="text-gray-300">Les agents bossent...</p>
+                    </div>
+                    
+                    <!-- Résultats 2 cartes -->
+                    <div id="results-container" class="hidden mt-8 grid md:grid-cols-2 gap-6">
+                        <div id="card-researcher" class="feature-card rounded-xl p-6 border-l-4 border-blue-500 opacity-0 transform translate-y-4 transition-all duration-700">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-search text-blue-400"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">Agent Chercheur 🔍</h3>
+                            </div>
+                            <div id="content-researcher" class="text-gray-300 text-sm">Analyse en cours...</div>
+                        </div>
+                        <div id="card-writer" class="feature-card rounded-xl p-6 border-l-4 border-orange-500 opacity-0 transform translate-y-4 transition-all duration-700">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-pen text-orange-400"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">Agent Rédacteur ✍️</h3>
+                            </div>
+                            <div id="content-writer" class="text-gray-200 text-sm">Rédaction en cours...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRICING -->
+        <section id="pricing" class="py-20 px-4">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-4xl md:text-5xl font-black text-center mb-4 scroll-reveal">
+                    Tarifs <span class="text-orange-400">simples</span>
+                </h2>
+                <div class="grid md:grid-cols-3 gap-8 mt-12">
+                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
+                        <h3 class="text-2xl font-bold mb-2">Gratuit</h3>
+                        <div class="text-4xl font-black mb-6">0€<span class="text-lg text-gray-400">/mois</span></div>
+                        <ul class="space-y-3 mb-8 text-gray-300">
+                            <li><i class="fas fa-check text-green-400 mr-3"></i>10 requêtes/jour</li>
+                            <li><i class="fas fa-check text-green-400 mr-3"></i>3 agents</li>
+                        </ul>
+                        <button class="w-full bg-white/10 hover:bg-white/20 py-3 rounded-xl transition">Commencer</button>
+                    </div>
+                    <div class="bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl p-8 transform scale-105 scroll-reveal">
+                        <div class="inline-block bg-black px-3 py-1 rounded-full text-sm font-bold mb-4"> POPULAIRE</div>
+                        <h3 class="text-2xl font-bold mb-2">Pro</h3>
+                        <div class="text-4xl font-black mb-6">9€<span class="text-lg opacity-75">/mois</span></div>
+                        <ul class="space-y-3 mb-8">
+                            <li><i class="fas fa-check mr-3"></i>500 requêtes/jour</li>
+                            <li><i class="fas fa-check mr-3"></i>Tous les agents</li>
+                            <li><i class="fas fa-check mr-3"></i>Upload illimité</li>
+                        </ul>
+                        <button class="w-full bg-white text-orange-600 hover:bg-gray-100 py-3 rounded-xl transition font-bold">Choisir</button>
+                    </div>
+                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
+                        <h3 class="text-2xl font-bold mb-2">Business</h3>
+                        <div class="text-4xl font-black mb-6">29€<span class="text-lg text-gray-400">/mois</span></div>
+                        <ul class="space-y-3 mb-8 text-gray-300">
+                            <li><i class="fas fa-check text-green-400 mr-3"></i>Illimité</li>
+                            <li><i class="fas fa-check text-green-400 mr-3"></i>Agents personnalisés</li>
+                            <li><i class="fas fa-check text-green-400 mr-3"></i>Support 24/7</li>
+                        </ul>
+                        <button class="w-full bg-white/10 hover:bg-white/20 py-3 rounded-xl transition">Contacter</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT -->
+        <section id="contact" class="py-20 px-4 bg-black/30">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-4xl md:text-5xl font-black mb-4 scroll-reveal">
+                    Contacte-<span class="text-orange-400">nous</span>
+                </h2>
+                <div class="grid md:grid-cols-2 gap-8 mt-12">
+                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
+                        <i class="fas fa-envelope text-5xl text-orange-400 mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-3">Email</h3>
+                        <a href="mailto:jpkdumal@yahoo.fr" class="text-gray-300 hover:text-orange-400 transition">
+                            jpkdumal@yahoo.fr
+                        </a>
+                    </div>
+                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
+                        <i class="fab fa-whatsapp text-5xl text-green-400 mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-3">WhatsApp</h3>
+                        <a href="https://wa.me/2250505641078" target="_blank" class="text-gray-300 hover:text-green-400 transition">
+                            +225 05 05 64 10 78
+                        </a>
+                    </div>
+                </div>
+                <div class="mt-12">
+                    <a href="https://wa.me/2250505641078" target="_blank" class="btn-whatsapp inline-block px-8 py-4 rounded-full text-lg font-bold">
+                        <i class="fab fa-whatsapp mr-2"></i> Discuter sur WhatsApp
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="py-12 px-4 border-t border-orange-500/20">
+            <div class="max-w-6xl mx-auto text-center">
+                <div class="flex items-center justify-center space-x-3 mb-6">
+                    <i class="fas fa-fire text-3xl text-orange-500"></i>
+                    <span class="text-2xl font-bold">TAMOMO AI PRO</span>
+                </div>
+                <div class="flex justify-center space-x-6 mb-8">
+                    <a href="mailto:jpkdumal@yahoo.fr" class="text-gray-400 hover:text-orange-400 transition">
+                        <i class="fas fa-envelope text-2xl"></i>
+                    </a>
+                    <a href="https://wa.me/2250505641078" target="_blank" class="text-gray-400 hover:text-green-400 transition">
+                        <i class="fab fa-whatsapp text-2xl"></i>
+                    </a>
+                </div>
+                <p class="text-gray-500 text-sm">© 2026 TAMOMO AI PRO. Tous droits réservés.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ÉTOILES
+        const starCanvas = document.getElementById('starfield');
+        const starCtx = starCanvas.getContext('2d');
+        let stars = [];
+        
+        function initStars() {
+            starCanvas.width = window.innerWidth;
+            starCanvas.height = window.innerHeight;
+            stars = [];
+            for (let i = 0; i < 150; i++) {
+                stars.push({
+                    x: Math.random() * starCanvas.width,
+                    y: Math.random() * starCanvas.height,
+                    size: Math.random() * 2,
+                    speed: Math.random() * 0.5 + 0.1
+                });
+            }
+        }
+        
+        function animateStars() {
+            starCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            starCtx.fillRect(0, 0, starCanvas.width, starCanvas.height);
+            stars.forEach(star => {
+                star.y += star.speed;
+                if (star.y > starCanvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * starCanvas.width;
+                }
+                starCtx.fillStyle = 'white';
+                starCtx.beginPath();
+                starCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                starCtx.fill();
+            });
+            requestAnimationFrame(animateStars);
+        }
+        initStars();
+        animateStars();
+
+        // FEUX D'ARTIFICE
+        const fwCanvas = document.getElementById('fireworks');
+        const fwCtx = fwCanvas.getContext('2d');
+        let fireworks = [];
+        let particles = [];
+        
+        function resizeFW() {
+            fwCanvas.width = window.innerWidth;
+            fwCanvas.height = window.innerHeight;
+        }
+        
+        class Firework {
+            constructor() {
+                this.x = Math.random() * fwCanvas.width;
+                this.y = fwCanvas.height;
+                this.targetY = Math.random() * fwCanvas.height * 0.5;
+                this.speed = Math.random() * 3 + 2;
+                this.hue = Math.random() * 360;
+            }
+            update() {
+                this.y -= this.speed;
+                if (this.y <= this.targetY) {
+                    this.explode();
+                    return false;
+                }
+                return true;
+            }
+            explode() {
+                for (let i = 0; i < 30; i++) {
+                    particles.push({
+                        x: this.x, y: this.y,
+                        vx: (Math.random() - 0.5) * 10,
+                        vy: (Math.random() - 0.5) * 10,
+                        hue: this.hue, alpha: 1
+                    });
+                }
+            }
+            draw() {
+                fwCtx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
+                fwCtx.beginPath();
+                fwCtx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                fwCtx.fill();
+            }
+        }
+        
+        function animateFireworks() {
+            fwCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            fwCtx.fillRect(0, 0, fwCanvas.width, fwCanvas.height);
+            if (Math.random() < 0.03) fireworks.push(new Firework());
+            fireworks = fireworks.filter(fw => { fw.draw(); return fw.update(); });
+            particles = particles.filter(p => {
+                p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.alpha -= 0.02;
+                if (p.alpha > 0) {
+                    fwCtx.fillStyle = `hsla(${p.hue}, 100%, 50%, ${p.alpha})`;
+                    fwCtx.beginPath();
+                    fwCtx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                    fwCtx.fill();
+                    return true;
+                }
+                return false;
+            });
+            requestAnimationFrame(animateFireworks);
+        }
+        resizeFW();
+        window.addEventListener('resize', resizeFW);
+        setTimeout(() => {
+            document.getElementById('fireworks').classList.add('active');
+            animateFireworks();
+        }, 8000);
+
+        // SCROLL REVEAL
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+
+        // FONCTION UPLOAD - Affiche le nom du fichier
+        function showFileName() {
+            const fileInput = document.getElementById('fileInput');
+            const fileName = document.getElementById('fileName');
+            if (fileInput.files[0]) {
+                fileName.textContent = ' ' + fileInput.files[0].name;
+            } else {
+                fileName.textContent = '';
+            }
+        }
+
+        // FONCTION PRINCIPALE - Lancer l'IA
+        async function lancerIA() {
+            const task = document.getElementById('taskInput').value;
+            const agentType = document.getElementById('agentType').value;
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!task.trim()) { 
+                alert('Veuillez entrer une demande'); 
+                return; 
+            }
+
+            document.getElementById('results-container').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+
+            try {
+                // Création du FormData (pour envoyer fichier + texte)
+                const formData = new FormData();
+                formData.append('task', task);
+                formData.append('agent_type', agentType);
+                if (fileInput.files[0]) {
+                    formData.append('file', fileInput.files[0]);
+                }
+
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('results-container').classList.remove('hidden');
+                document.getElementById('loading').classList.add('hidden');
+
+                // Carte 1 : Chercheur
+                setTimeout(() => {
+                    document.getElementById('card-researcher').classList.remove('opacity-0', 'translate-y-4');
+                    document.getElementById('content-researcher').innerHTML = `
+                        <span class="text-blue-400 font-bold">✅ Analyse:</span><br>
+                        Fichier: ${data.file_processed || 'Aucun'}<br>
+                        Agent: ${data.agent_used}
+                    `;
+                }, 300);
+
+                // Carte 2 : Rédacteur
+                setTimeout(() => {
+                    document.getElementById('card-writer').classList.remove('opacity-0', 'translate-y-4');
+                    document.getElementById('content-writer').textContent = data.result;
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => fireworks.push(new Firework()), i * 300);
+                    }
+                }, 1200);
+
+            } catch (error) {
+                alert('Erreur: ' + error.message);
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        // SCROLL DOUX
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    </script>
+</body>
+</html>
