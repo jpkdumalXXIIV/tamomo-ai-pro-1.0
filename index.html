@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAMOMO AI PRO</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 min-h-screen font-sans">
+    
+    <nav class="bg-white/10 backdrop-blur-md border-b border-white/20">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center text-white text-2xl font-bold">
+                <i class="fas fa-robot text-blue-400 mr-3"></i> TAMOMO AI PRO
+            </div>
+            <a href="/docs" class="text-white hover:text-blue-300"><i class="fas fa-code mr-2"></i>API</a>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-4 py-16 text-center">
+        <h1 class="text-5xl font-bold text-white mb-6">Votre Équipe IA <span class="text-blue-400">Multi-Agents</span></h1>
+        <p class="text-xl text-gray-300 mb-10">Automatisez vos tâches avec une équipe d'agents IA spécialisés.</p>
+        
+        <div class="bg-white rounded-2xl shadow-2xl p-8 text-left">
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2">Choisir un agent</label>
+                <select id="agentType" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option value="coordinator">🤖 Coordinateur (Automatique)</option>
+                    <option value="researcher">🔍 Chercheur</option>
+                    <option value="writer">✍️ Rédacteur</option>
+                </select>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-gray-700 font-bold mb-2">Votre demande</label>
+                <textarea id="taskInput" rows="3" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Ex: Écris un article sur l'IA..."></textarea>
+            </div>
+            
+            <button onclick="lancerIA()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg transition text-lg">
+                <i class="fas fa-paper-plane mr-2"></i> Lancer l'IA
+            </button>
+            
+            <div id="loading" class="hidden text-center py-6">
+                <i class="fas fa-spinner fa-spin text-4xl text-blue-600"></i>
+                <p class="text-gray-600 mt-3">L'IA réfléchit...</p>
+            </div>
+            
+            <div id="result" class="hidden mt-6 p-6 bg-gray-50 rounded-lg border">
+                <h3 class="font-bold text-gray-900 mb-3">Résultat :</h3>
+                <div id="resultContent" class="text-gray-700 whitespace-pre-wrap"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function lancerIA() {
+            const task = document.getElementById('taskInput').value;
+            const agentType = document.getElementById('agentType').value;
+            
+            if (!task.trim()) { alert('Veuillez entrer une demande'); return; }
+
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('result').classList.add('hidden');
+
+            try {
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ task: task, agent_type: agentType })
+                });
+                const data = await response.json();
+                document.getElementById('resultContent').textContent = data.result;
+                document.getElementById('result').classList.remove('hidden');
+            } catch (error) {
+                alert('Erreur: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
