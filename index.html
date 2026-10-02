@@ -301,31 +301,88 @@
                 <p class="text-center text-gray-400 mb-16 text-lg">La plateforme IA des jeunes</p>
                 
                 <div class="grid md:grid-cols-3 gap-8">
-                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
-                        <div class="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mb-6">
-                            <i class="fas fa-brain text-3xl text-orange-400"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-4">Multi-Agents</h3>
-                        <p class="text-gray-300">3 agents spécialisés qui collaborent automatiquement.</p>
+                                    <div class="feature-card rounded-3xl p-8 scroll-reveal">
+                    
+                    <!-- Sélecteur d'agent -->
+                    <div class="mb-6">
+                        <label class="block text-white font-semibold mb-3">
+                            <i class="fas fa-robot mr-2 text-orange-400"></i>Choisis ton agent
+                        </label>
+                        <select id="agentType" class="w-full px-4 py-3 bg-white/10 border border-orange-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <option value="coordinator" class="bg-gray-900">🤖 Coordinateur (Auto)</option>
+                            <option value="researcher" class="bg-gray-900">🔍 Chercheur</option>
+                            <option value="writer" class="bg-gray-900">️ Rédacteur</option>
+                        </select>
                     </div>
                     
-                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
-                        <div class="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mb-6">
-                            <i class="fas fa-bolt text-3xl text-yellow-400"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-4">Ultra Rapide</h3>
-                        <p class="text-gray-300">Résultats en temps réel. Pas d'attente.</p>
+                    <!-- Zone de texte -->
+                    <div class="mb-6">
+                        <label class="block text-white font-semibold mb-3">
+                            <i class="fas fa-comment mr-2 text-yellow-400"></i>Ta demande
+                        </label>
+                        <textarea id="taskInput" rows="4" class="w-full px-4 py-3 bg-white/10 border border-orange-500/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500" 
+                            placeholder="Ex: Résume ce document, ou pose une question..."></textarea>
                     </div>
                     
-                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
-                        <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-6">
-                            <i class="fas fa-shield-alt text-3xl text-red-400"></i>
+                    <!-- NOUVEAU : Bouton d'upload de fichier -->
+                    <div class="mb-6">
+                        <label class="block text-white font-semibold mb-3">
+                            <i class="fas fa-paperclip mr-2 text-blue-400"></i>Ajouter un fichier (optionnel)
+                        </label>
+                        <div class="flex items-center space-x-4">
+                            <label class="flex-1 cursor-pointer">
+                                <div class="bg-white/10 border-2 border-dashed border-orange-500/30 rounded-xl px-4 py-6 text-center hover:border-orange-500 transition">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-orange-400 mb-2"></i>
+                                    <p class="text-gray-300 text-sm">Clique pour uploader un PDF ou TXT</p>
+                                    <p id="fileName" class="text-orange-400 text-xs mt-2 font-semibold"></p>
+                                </div>
+                                <input type="file" id="fileInput" accept=".pdf,.txt" class="hidden" onchange="showFileName()">
+                            </label>
                         </div>
-                        <h3 class="text-2xl font-bold mb-4">100% Sécurisé</h3>
-                        <p class="text-gray-300">Tes données restent privées et protégées.</p>
+                    </div>
+                    
+                    <!-- Bouton d'action -->
+                    <button onclick="lancerIA()" class="btn-primary w-full text-white font-bold py-4 rounded-xl text-lg">
+                        <i class="fas fa-magic mr-2"></i> Générer avec l'IA
+                    </button>
+                    
+                    <!-- Loading spinner -->
+                    <div id="loading" class="hidden text-center py-8 mt-6">
+                        <div class="spinner mx-auto mb-4"></div>
+                        <p class="text-gray-300">Les agents bossent...</p>
+                    </div>
+                    
+                    <!-- Résultats -->
+                    <div id="results-container" class="hidden mt-8 grid md:grid-cols-2 gap-6">
+                        
+                        <!-- Carte 1: Chercheur -->
+                        <div id="card-researcher" class="feature-card rounded-xl p-6 border-l-4 border-blue-500 opacity-0 transform translate-y-4 transition-all duration-700">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-search text-blue-400"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">Agent Chercheur 🔍</h3>
+                            </div>
+                            <div id="content-researcher" class="text-gray-300 text-sm">
+                                Analyse en cours...
+                            </div>
+                        </div>
+
+                        <!-- Carte 2: Rédacteur -->
+                        <div id="card-writer" class="feature-card rounded-xl p-6 border-l-4 border-orange-500 opacity-0 transform translate-y-4 transition-all duration-700">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-pen text-orange-400"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">Agent Rédacteur ✍️</h3>
+                            </div>
+                            <div id="content-writer" class="text-gray-200 text-sm">
+                                Rédaction en cours...
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            </div>
         </section>
 
         <!-- ============================================
@@ -675,11 +732,11 @@
         // ============================================
         // 4. FONCTION PRINCIPALE - LANCER L'IA
         // ============================================
-        async function lancerIA() {
+                async function lancerIA() {
             const task = document.getElementById('taskInput').value;
             const agentType = document.getElementById('agentType').value;
+            const fileInput = document.getElementById('fileInput');
             
-            // Validation simple
             if (!task.trim()) { 
                 alert('Veuillez entrer une demande'); 
                 return; 
@@ -690,11 +747,19 @@
             document.getElementById('loading').classList.remove('hidden');
 
             try {
+                // Créer un FormData pour envoyer le fichier + le texte
+                const formData = new FormData();
+                formData.append('task', task);
+                formData.append('agent_type', agentType);
+                
+                if (fileInput.files[0]) {
+                    formData.append('file', fileInput.files[0]);
+                }
+
                 // Appel à l'API Python
                 const response = await fetch('/execute', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ task: task, agent_type: agentType })
+                    body: formData  // On envoie FormData au lieu de JSON
                 });
                 
                 const data = await response.json();
@@ -708,7 +773,8 @@
                     document.getElementById('card-researcher').classList.remove('opacity-0', 'translate-y-4');
                     document.getElementById('content-researcher').innerHTML = `
                         <span class="text-blue-400 font-bold">✅ Analyse:</span><br>
-                        J'ai analysé: "${task.substring(0, 40)}..."
+                        Fichier: ${data.file_processed || 'Aucun'}<br>
+                        Agent: ${data.agent_used}
                     `;
                 }, 300);
 
@@ -726,6 +792,17 @@
             } catch (error) {
                 alert('Erreur: ' + error.message);
                 document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        // Fonction pour afficher le nom du fichier sélectionné
+        function showFileName() {
+            const fileInput = document.getElementById('fileInput');
+            const fileName = document.getElementById('fileName');
+            if (fileInput.files[0]) {
+                fileName.textContent = '📎 ' + fileInput.files[0].name;
+            } else {
+                fileName.textContent = '';
             }
         }
 
