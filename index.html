@@ -200,6 +200,27 @@
         .text-gray-300 { color: #d1d5db !important; }
         .text-gray-400 { color: #9ca3af !important; }
         .text-gray-500 { color: #6b7280 !important; }
+        /* ============================================
+           CORRECTION SECTION TARIFS
+           (Force les couleurs dans les cartes de prix)
+           ============================================ */
+        #pricing .feature-card h3,
+        #pricing .feature-card .text-4xl,
+        #pricing .feature-card ul li {
+            color: #ffffff !important;
+        }
+        
+        /* Carte PRO (fond orange/jaune) - texte noir pour contraste */
+        #pricing .bg-gradient-to-br h3,
+        #pricing .bg-gradient-to-br .text-4xl,
+        #pricing .bg-gradient-to-br ul li,
+        #pricing .bg-gradient-to-br .inline-block {
+            color: #000000 !important;
+        }
+        
+        #pricing .bg-gradient-to-br button {
+            color: #ea580c !important; /* Orange foncé */
+        }
     </style>
 </head>
 <body>
