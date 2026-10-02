@@ -8,6 +8,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* ============================================
+           CORRECTIF DE COULEURS (Lisibilité parfaite)
+           ============================================ */
+        body { color: #ffffff !important; } /* Force le blanc pur partout */
+        .text-gray-300 { color: #e5e7eb !important; } /* Gris très clair */
+        .text-gray-400 { color: #d1d5db !important; } /* Gris clair */
+        
+        /* Correction cruciale pour les formulaires */
+        select, textarea, input {
+            color: #ffffff !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* Correction pour les options du menu déroulant */
+        select option {
+            background-color: #1a1a2e !important; /* Fond sombre */
+            color: #ffffff !important; /* Texte blanc */
+        }
+        /* ============================================
            STYLES DE BASE
            ============================================ */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap');
