@@ -276,4 +276,403 @@
                 <p class="text-center text-gray-400 mb-16 text-lg">La plateforme IA des jeunes</p>
                 <div class="grid md:grid-cols-3 gap-8">
                     <div class="feature-card rounded-2xl p-8 scroll-reveal">
-                        <div class="w-16 h-16 bg
+                        <div class="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-brain text-3xl text-orange-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-white">Multi-Agents</h3>
+                        <p class="text-gray-300">3 agents spécialisés qui collaborent automatiquement.</p>
+                    </div>
+                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
+                        <div class="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-bolt text-3xl text-yellow-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-white">Ultra Rapide</h3>
+                        <p class="text-gray-300">Résultats en temps réel. Pas d'attente.</p>
+                    </div>
+                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
+                        <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-file-alt text-3xl text-red-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-white">Upload de Fichiers</h3>
+                        <p class="text-gray-300">Importe tes PDF et documents pour analyse IA.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DEMO -->
+        <section id="demo" class="py-20 px-4 bg-black/30">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-4xl md:text-5xl font-black text-center mb-4 scroll-reveal text-white">
+                    Teste <span class="text-orange-400">maintenant</span>
+                </h2>
+                <p class="text-center text-gray-400 mb-12">Gratuit, sans inscription</p>
+                
+                <div class="feature-card rounded-3xl p-8 scroll-reveal">
+                    
+                    <!-- Agent -->
+                    <div class="mb-6">
+                        <label class="block text-white font-semibold mb-3">
+                            <i class="fas fa-robot mr-2 text-orange-400"></i>Choisis ton agent
+                        </label>
+                        <select id="agentType" class="w-full px-4 py-3 bg-black/60 border-2 border-orange-500/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <option value="coordinator">🤖 Coordinateur (Auto)</option>
+                            <option value="researcher"> Chercheur</option>
+                            <option value="writer">✍️ Rédacteur</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Demande -->
+                    <div class="mb-6">
+                        <label class="block text-white font-semibold mb-3">
+                            <i class="fas fa-comment mr-2 text-yellow-400"></i>Ta demande
+                        </label>
+                        <textarea id="taskInput" rows="4" class="w-full px-4 py-3 bg-black/60 border-2 border-orange-500/30 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500" 
+                            placeholder="Ex: Résume ce document, ou pose une question..."></textarea>
+                    </div>
+                    
+                    <!-- UPLOAD FICHIER -->
+                    <div class="mb-6">
+                        <label class="block text-white font-semibold mb-3">
+                            <i class="fas fa-paperclip mr-2 text-blue-400"></i>Ajouter un fichier (optionnel)
+                        </label>
+                        <label class="upload-zone block bg-black/60 border-2 border-dashed border-orange-500/30 rounded-xl px-4 py-6 text-center">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-orange-400 mb-2"></i>
+                            <p class="text-gray-300 text-sm">Clique pour uploader un PDF ou TXT</p>
+                            <p id="fileName" class="text-orange-400 text-xs mt-2 font-semibold"></p>
+                            <input type="file" id="fileInput" accept=".pdf,.txt" class="hidden" onchange="showFileName()">
+                        </label>
+                    </div>
+                    
+                    <!-- CODE VIP -->
+                    <div class="mb-6">
+                        <label class="block text-white font-semibold mb-3">
+                            <i class="fas fa-crown mr-2 text-yellow-400"></i>Code VIP (Optionnel)
+                        </label>
+                        <input type="text" id="vipCode" class="w-full px-4 py-3 bg-black/60 border-2 border-yellow-500/30 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500" 
+                            placeholder="Entre ton code secret pour l'accès illimité...">
+                    </div>
+                    
+                    <!-- Bouton -->
+                    <button onclick="lancerIA()" class="btn-primary w-full text-white font-bold py-4 rounded-xl text-lg">
+                        <i class="fas fa-magic mr-2"></i> Générer avec l'IA
+                    </button>
+                    
+                    <!-- Loading -->
+                    <div id="loading" class="hidden text-center py-8 mt-6">
+                        <div class="spinner mx-auto mb-4"></div>
+                        <p class="text-gray-300">Les agents bossent...</p>
+                    </div>
+                    
+                    <!-- Résultats 2 cartes -->
+                    <div id="results-container" class="hidden mt-8 grid md:grid-cols-2 gap-6">
+                        <div id="card-researcher" class="feature-card rounded-xl p-6 border-l-4 border-blue-500 opacity-0 transform translate-y-4 transition-all duration-700">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-search text-blue-400"></i>
+                                </div>
+                                <h3 class="font-bold text-lg text-white">Agent Chercheur 🔍</h3>
+                            </div>
+                            <div id="content-researcher" class="text-gray-300 text-sm">Analyse en cours...</div>
+                        </div>
+                        <div id="card-writer" class="feature-card rounded-xl p-6 border-l-4 border-orange-500 opacity-0 transform translate-y-4 transition-all duration-700">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-pen text-orange-400"></i>
+                                </div>
+                                <h3 class="font-bold text-lg text-white">Agent Rédacteur ✍️</h3>
+                            </div>
+                            <div id="content-writer" class="text-gray-200 text-sm">Rédaction en cours...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRICING -->
+        <section id="pricing" class="py-20 px-4">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-4xl md:text-5xl font-black text-center mb-4 scroll-reveal text-white">
+                    Tarifs <span class="text-orange-400">simples</span>
+                </h2>
+                <div class="grid md:grid-cols-3 gap-8 mt-12">
+                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
+                        <h3 class="text-2xl font-bold mb-2 text-white">Gratuit</h3>
+                        <div class="text-4xl font-black mb-6 text-white">0€<span class="text-lg text-gray-400">/mois</span></div>
+                        <ul class="space-y-3 mb-8 text-gray-300">
+                            <li><i class="fas fa-check text-green-400 mr-3"></i>10 requêtes/jour</li>
+                            <li><i class="fas fa-check text-green-400 mr-3"></i>3 agents</li>
+                        </ul>
+                        <button class="w-full bg-white/10 hover:bg-white/20 py-3 rounded-xl transition text-white font-semibold">Commencer</button>
+                    </div>
+                    <div class="bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl p-8 transform scale-105 scroll-reveal">
+                        <div class="inline-block bg-black px-3 py-1 rounded-full text-sm font-bold mb-4 text-white"> POPULAIRE</div>
+                        <h3 class="text-2xl font-bold mb-2 text-white">Pro</h3>
+                        <div class="text-4xl font-black mb-6 text-white">9€<span class="text-lg opacity-75">/mois</span></div>
+                        <ul class="space-y-3 mb-8 text-white">
+                            <li><i class="fas fa-check mr-3"></i>500 requêtes/jour</li>
+                            <li><i class="fas fa-check mr-3"></i>Tous les agents</li>
+                            <li><i class="fas fa-check mr-3"></i>Upload illimité</li>
+                        </ul>
+                        <button class="w-full bg-white text-orange-600 hover:bg-gray-100 py-3 rounded-xl transition font-bold">Choisir</button>
+                    </div>
+                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
+                        <h3 class="text-2xl font-bold mb-2 text-white">Business</h3>
+                        <div class="text-4xl font-black mb-6 text-white">29€<span class="text-lg text-gray-400">/mois</span></div>
+                        <ul class="space-y-3 mb-8 text-gray-300">
+                            <li><i class="fas fa-check text-green-400 mr-3"></i>Illimité</li>
+                            <li><i class="fas fa-check text-green-400 mr-3"></i>Agents personnalisés</li>
+                            <li><i class="fas fa-check text-green-400 mr-3"></i>Support 24/7</li>
+                        </ul>
+                        <button class="w-full bg-white/10 hover:bg-white/20 py-3 rounded-xl transition text-white font-semibold">Contacter</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT -->
+        <section id="contact" class="py-20 px-4 bg-black/30">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-4xl md:text-5xl font-black mb-4 scroll-reveal text-white">
+                    Contacte-<span class="text-orange-400">nous</span>
+                </h2>
+                <div class="grid md:grid-cols-2 gap-8 mt-12">
+                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
+                        <i class="fas fa-envelope text-5xl text-orange-400 mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-3 text-white">Email</h3>
+                        <a href="mailto:jpkdumal@yahoo.fr" class="text-gray-300 hover:text-orange-400 transition">
+                            jpkdumal@yahoo.fr
+                        </a>
+                    </div>
+                    <div class="feature-card rounded-2xl p-8 scroll-reveal">
+                        <i class="fab fa-whatsapp text-5xl text-green-400 mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-3 text-white">WhatsApp</h3>
+                        <a href="https://wa.me/2250505641078" target="_blank" class="text-gray-300 hover:text-green-400 transition">
+                            +225 05 05 64 10 78
+                        </a>
+                    </div>
+                </div>
+                <div class="mt-12">
+                    <a href="https://wa.me/2250505641078" target="_blank" class="btn-whatsapp inline-block px-8 py-4 rounded-full text-lg font-bold">
+                        <i class="fab fa-whatsapp mr-2"></i> Discuter sur WhatsApp
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="py-12 px-4 border-t border-orange-500/20">
+            <div class="max-w-6xl mx-auto text-center">
+                <div class="flex items-center justify-center space-x-3 mb-6">
+                    <i class="fas fa-fire text-3xl text-orange-500"></i>
+                    <span class="text-2xl font-bold text-white">TAMOMO AI PRO</span>
+                </div>
+                <div class="flex justify-center space-x-6 mb-8">
+                    <a href="mailto:jpkdumal@yahoo.fr" class="text-gray-400 hover:text-orange-400 transition">
+                        <i class="fas fa-envelope text-2xl"></i>
+                    </a>
+                    <a href="https://wa.me/2250505641078" target="_blank" class="text-gray-400 hover:text-green-400 transition">
+                        <i class="fab fa-whatsapp text-2xl"></i>
+                    </a>
+                </div>
+                <p class="text-gray-500 text-sm">© 2026 TAMOMO AI PRO. Tous droits réservés.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ÉTOILES
+        const starCanvas = document.getElementById('starfield');
+        const starCtx = starCanvas.getContext('2d');
+        let stars = [];
+        
+        function initStars() {
+            starCanvas.width = window.innerWidth;
+            starCanvas.height = window.innerHeight;
+            stars = [];
+            for (let i = 0; i < 150; i++) {
+                stars.push({
+                    x: Math.random() * starCanvas.width,
+                    y: Math.random() * starCanvas.height,
+                    size: Math.random() * 2,
+                    speed: Math.random() * 0.5 + 0.1
+                });
+            }
+        }
+        
+        function animateStars() {
+            starCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            starCtx.fillRect(0, 0, starCanvas.width, starCanvas.height);
+            stars.forEach(star => {
+                star.y += star.speed;
+                if (star.y > starCanvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * starCanvas.width;
+                }
+                starCtx.fillStyle = 'white';
+                starCtx.beginPath();
+                starCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                starCtx.fill();
+            });
+            requestAnimationFrame(animateStars);
+        }
+        initStars();
+        animateStars();
+
+        // FEUX D'ARTIFICE
+        const fwCanvas = document.getElementById('fireworks');
+        const fwCtx = fwCanvas.getContext('2d');
+        let fireworks = [];
+        let particles = [];
+        
+        function resizeFW() {
+            fwCanvas.width = window.innerWidth;
+            fwCanvas.height = window.innerHeight;
+        }
+        
+        class Firework {
+            constructor() {
+                this.x = Math.random() * fwCanvas.width;
+                this.y = fwCanvas.height;
+                this.targetY = Math.random() * fwCanvas.height * 0.5;
+                this.speed = Math.random() * 3 + 2;
+                this.hue = Math.random() * 360;
+            }
+            update() {
+                this.y -= this.speed;
+                if (this.y <= this.targetY) {
+                    this.explode();
+                    return false;
+                }
+                return true;
+            }
+            explode() {
+                for (let i = 0; i < 30; i++) {
+                    particles.push({
+                        x: this.x, y: this.y,
+                        vx: (Math.random() - 0.5) * 10,
+                        vy: (Math.random() - 0.5) * 10,
+                        hue: this.hue, alpha: 1
+                    });
+                }
+            }
+            draw() {
+                fwCtx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
+                fwCtx.beginPath();
+                fwCtx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                fwCtx.fill();
+            }
+        }
+        
+        function animateFireworks() {
+            fwCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            fwCtx.fillRect(0, 0, fwCanvas.width, fwCanvas.height);
+            if (Math.random() < 0.03) fireworks.push(new Firework());
+            fireworks = fireworks.filter(fw => { fw.draw(); return fw.update(); });
+            particles = particles.filter(p => {
+                p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.alpha -= 0.02;
+                if (p.alpha > 0) {
+                    fwCtx.fillStyle = `hsla(${p.hue}, 100%, 50%, ${p.alpha})`;
+                    fwCtx.beginPath();
+                    fwCtx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                    fwCtx.fill();
+                    return true;
+                }
+                return false;
+            });
+            requestAnimationFrame(animateFireworks);
+        }
+        resizeFW();
+        window.addEventListener('resize', resizeFW);
+        setTimeout(() => {
+            document.getElementById('fireworks').classList.add('active');
+            animateFireworks();
+        }, 8000);
+
+        // SCROLL REVEAL
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+
+        // UPLOAD - Affiche le nom du fichier
+        function showFileName() {
+            const fileInput = document.getElementById('fileInput');
+            const fileName = document.getElementById('fileName');
+            if (fileInput.files[0]) {
+                fileName.textContent = '📎 ' + fileInput.files[0].name;
+            } else {
+                fileName.textContent = '';
+            }
+        }
+
+        // FONCTION PRINCIPALE - Lancer l'IA
+        async function lancerIA() {
+            const task = document.getElementById('taskInput').value;
+            const agentType = document.getElementById('agentType').value;
+            const fileInput = document.getElementById('fileInput');
+            const vipCode = document.getElementById('vipCode').value;
+            
+            if (!task.trim()) { 
+                alert('Veuillez entrer une demande'); 
+                return; 
+            }
+
+            document.getElementById('results-container').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+
+            try {
+                const formData = new FormData();
+                formData.append('task', task);
+                formData.append('agent_type', agentType);
+                formData.append('secret_code', vipCode);
+                
+                if (fileInput.files[0]) {
+                    formData.append('file', fileInput.files[0]);
+                }
+
+                const response = await fetch('/execute', { method: 'POST', body: formData });
+                const data = await response.json();
+                
+                document.getElementById('results-container').classList.remove('hidden');
+                document.getElementById('loading').classList.add('hidden');
+
+                // Carte 1 : Chercheur
+                setTimeout(() => {
+                    document.getElementById('card-researcher').classList.remove('opacity-0', 'translate-y-4');
+                    let vipBadge = data.is_vip ? '<br><span class="text-yellow-400 font-bold"> STATUS VIP ACTIVÉ</span>' : '';
+                    document.getElementById('content-researcher').innerHTML = `
+                        <span class="text-blue-400 font-bold">✅ Analyse:</span><br>
+                        Fichier: ${data.file_processed || 'Aucun'}<br>
+                        Agent: ${data.agent_used}${vipBadge}
+                    `;
+                }, 300);
+
+                // Carte 2 : Rédacteur
+                setTimeout(() => {
+                    document.getElementById('card-writer').classList.remove('opacity-0', 'translate-y-4');
+                    document.getElementById('content-writer').textContent = data.result;
+                    for (let i = 0; i < (data.is_vip ? 5 : 3); i++) {
+                        setTimeout(() => fireworks.push(new Firework()), i * 300);
+                    }
+                }, 1200);
+
+            } catch (error) {
+                alert('Erreur: ' + error.message);
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        // SCROLL DOUX
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    </script>
+</body>
+</html>
