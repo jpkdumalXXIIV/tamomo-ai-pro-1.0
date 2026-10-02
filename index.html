@@ -17,7 +17,31 @@
             color: white;
             min-height: 100vh;
         }
+        /* ============================================
+           PATCH BLINDÉ : COULEURS DE FORMULAIRES
+           (Force les couleurs même si le navigateur résiste)
+           ============================================ */
+        input, textarea, select {
+            color: #ffffff !important; /* Texte blanc pur */
+            background-color: rgba(0, 0, 0, 0.6) !important; /* Fond sombre */
+            -webkit-text-fill-color: #ffffff !important; /* Pour Safari/Chrome */
+        }
+        
+        input::placeholder, textarea::placeholder {
+            color: #d1d5db !important; /* Texte fantôme gris clair */
+            opacity: 1 !important;
+        }
 
+        /* Fix spécial pour l'autofill (quand le navigateur remplit tout seul) */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        textarea:-webkit-autofill,
+        select:-webkit-autofill {
+            -webkit-text-fill-color: #ffffff !important;
+            -webkit-box-shadow: 0 0 0px 1000px rgba(0, 0, 0, 0.6) inset !important;
+            transition: background-color 5000s ease-in-out 0s !important;
+        }
         /* CANVAS */
         #starfield, #fireworks {
             position: fixed;
