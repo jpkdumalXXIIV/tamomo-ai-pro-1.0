@@ -39,22 +39,25 @@ def root():
 async def execute_task(
     task: str = Form(...),
     agent_type: str = Form("coordinator"),
+    secret_code: str = Form(""),  # NOUVEAU : Le code VIP
     file: Optional[UploadFile] = File(None)
 ):
-    """
-    Traite la demande de l'utilisateur avec ou sans fichier.
-    Reçoit : task (texte), agent_type (type d'agent), file (fichier optionnel)
-    """
+    """Traite la demande et vérifie le code VIP"""
+    
+    # Vérification du code VIP
+    is_vip = False
+    VIP_CODES = ["TAMOMO2026", "GEEK2026", "BOSS2026"] # Tes codes secrets
+    
+    if secret_code.upper() in VIP_CODES:
+        is_vip = True
     
     file_content = None
     file_name = None
     
-    # Si un fichier est uploadé, on l'analyse
+    # Analyse du fichier
     if file:
         file_name = file.filename
         content = await file.read()
-        
-        # Lecture du PDF
         if file_name.endswith('.pdf'):
             try:
                 pdf_reader = pypdf.PdfReader(io.BytesIO(content))
@@ -63,35 +66,32 @@ async def execute_task(
                     file_content += page.extract_text() + "\n"
             except Exception as e:
                 file_content = f"Erreur lecture PDF: {str(e)}"
-        
-        # Lecture du fichier texte
         elif file_name.endswith('.txt'):
             file_content = content.decode('utf-8')
-        
         else:
-            file_content = "Format non supporté. Utilisez PDF ou TXT."
+            file_content = "Format non supporté."
     
     # Construction de la réponse
-    result = f"📄 **Fichier analysé :** {file_name if file_name else 'Aucun'}\n\n"
-    result += f"📊 **Taille du contenu :** {len(file_content) if file_content else 0} caractères\n\n"
-    result += f"🤖 **Agent utilisé :** {agent_type}\n\n"
-    result += f"📝 **Ta demande :** {task}\n\n"
+    badge = " **VIP ACTIVÉ** 🌟\n\n" if is_vip else " **Mode Gratuit**\n\n"
+    
+    result = f"{badge} **Fichier :** {file_name if file_name else 'Aucun'}\n\n"
+    result += f"🤖 **Agent :** {agent_type}\n\n"
+    result += f" **Demande :** {task}\n\n"
     
     if file_content:
-        # On affiche les 500 premiers caractères du document
-        preview = file_content[:500].replace('\n', ' ')
-        result += f"📋 **Aperçu du document :**\n{preview}...\n\n"
-        result += "✅ L'IA a analysé ton document avec succès !"
+        preview = file_content[:300].replace('\n', ' ')
+        result += f"📋 **Aperçu :**\n{preview}...\n\n"
+        result += "✅ Document analysé avec succès !"
     else:
-        result += "✅ Traitement effectué sans fichier joint."
+        result += "✅ Traitement effectué. L'IA a généré ta réponse."
     
     return {
         "success": True,
         "result": result,
         "agent_used": agent_type,
-        "file_processed": file_name
+        "file_processed": file_name,
+        "is_vip": is_vip  # On renvoie l'info VIP au site
     }
-
 # ============================================
 # ROUTE 3 : Vérification de santé (pour Railway)
 # ============================================
